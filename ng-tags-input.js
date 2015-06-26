@@ -536,6 +536,10 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
             });
         };
 
+        self.valCurrent = function(val){
+
+        };
+
         self.reset = function() {
             lastPromise = null;
 
@@ -543,7 +547,7 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
             self.visible = false;
             self.index = -1;
             self.selected = null;
-            self.query = null;
+            //self.query = null;
         };
         self.show = function() {
             if (options.selectFirstMatch) {
@@ -564,7 +568,22 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
                 if (promise !== lastPromise) {
                     return;
                 }
-
+                //debugger;
+                var nItems = [];
+                angular.forEach(items, function(el, ind) {
+                  nItems.push({text: el, id: 1, index: ind});
+                });
+                var isInList = false;
+                angular.forEach(items, function(el) {
+                  if(el === query){
+                    isInList = true;
+                  }
+                });
+                if (!isInList){
+                    nItems.push({text: query + ' (New tag)', id:2, index: nItems.length});
+                }
+                //debugger; 
+                items = nItems;
                 items = tiUtil.makeObjectArray(items.data || items, getTagId());
                 items = getDifference(items, tags);
                 self.items = items.slice(0, options.maxResultsToShow);
@@ -673,7 +692,12 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
             scope.addSuggestion = function() {
                 var added = false;
 
+
                 if (suggestionList.selected) {
+                    if (suggestionList.selected.id === 2){
+                        suggestionList.selected.text = suggestionList.selected.text.split(' (New tag)')[0];
+                    }
+                    
                     tagsInput.addTag(angular.copy(suggestionList.selected));
                     suggestionList.reset();
                     tagsInput.focusInput();
@@ -701,9 +725,8 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
                 })
                 .on('input-focus', function() {
                     var value = tagsInput.getCurrentTagText();
-                    if (options.loadOnFocus && shouldLoadSuggestions(value)) {
                         suggestionList.load(value, tagsInput.getTags());
-                    }
+        
                 })
                 .on('input-keydown', function(event) {
                     var key = event.keyCode,
@@ -1114,7 +1137,9 @@ tagsInput.run(["$templateCache", function($templateCache) {
   );
 
   $templateCache.put('ngTagsInput/auto-complete.html',
-    "<div class=\"autocomplete\" ng-if=\"suggestionList.visible\"><ul class=\"suggestion-list\"><li class=\"suggestion-item\" ng-repeat=\"item in suggestionList.items track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex($index)\" ng-mouseenter=\"suggestionList.select($index)\"><ti-autocomplete-match data=\"item\"></ti-autocomplete-match></li></ul></div>"
+    "<div class=\"autocomplete\" ng-if=\"suggestionList.visible\"><ul ng-show=\"filterResultSugg && filterResultSugg.length\" class=\"suggestion-list\"><strong>Suggestions</strong><li class=\"suggestion-item\" ng-repeat=\"item in filterResultSugg = (suggestionList.items | filter: {id: 1}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex($index)\" ng-mouseenter=\"suggestionList.select($index)\"><ti-autocomplete-match data=\"item\"></ti-autocomplete-match></li></ul>\
+    <ul ng-show=\"filterResult && filterResult.length\" class=\"suggestion-list new-tag\"><div ng-show=\"filterResultSugg && filterResultSugg.length\" class=\"line\"></div><li class=\"suggestion-item\" ng-repeat=\"item in filterResult = (suggestionList.items | filter: {id: 2}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex(item.index)\" ng-mouseenter=\"suggestionList.select(item.index)\"><ti-autocomplete-match data=\"item\"></ti-autocomplete-match></li></ul>\
+    </div>"
   );
 
   $templateCache.put('ngTagsInput/auto-complete-match.html',
