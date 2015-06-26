@@ -516,7 +516,7 @@ tagsInput.directive('tiTagItem', ["tiUtil", function(tiUtil) {
  *                                           the suggestion list is shown.
  * @param {string=} [template=] URL or id of a custom template for rendering each element of the autocomplete list.
  */
-tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInputConfig","tiUtil", function($document, $timeout, $sce, $q, tagsInputConfig, tiUtil) {
+tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","$translate","tagsInputConfig","tiUtil", function($document, $timeout, $sce, $q, $translate, tagsInputConfig, tiUtil) {
     function SuggestionList(loadFn, options, events) {
         var self = {}, getDifference, lastPromise, getTagId;
 
@@ -580,7 +580,7 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
                   }
                 });
                 if (!isInList){
-                    nItems.push({text: query + ' (New tag)', id:2, index: nItems.length});
+                    nItems.push({text: query + $translate.instant('NEW_TAG'), id:2, index: nItems.length});
                 }
                 //debugger; 
                 items = nItems;
@@ -695,7 +695,7 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","tagsInp
 
                 if (suggestionList.selected) {
                     if (suggestionList.selected.id === 2){
-                        suggestionList.selected.text = suggestionList.selected.text.split(' (New tag)')[0];
+                        suggestionList.selected.text = suggestionList.selected.text.split($translate.instant('NEW_TAG'))[0];
                     }
                     
                     tagsInput.addTag(angular.copy(suggestionList.selected));
