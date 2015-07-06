@@ -21,7 +21,7 @@ var KEYS = {
     left: 37,
     right: 39,
     delete: 46,
-    comma: 188
+    comma: 44
 };
 
 var MAX_SAFE_INTEGER = 9007199254740991;
@@ -171,6 +171,25 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
         return SUPPORTED_INPUT_TYPES.indexOf(type) !== -1;
     }
 
+    /**
+     * validate comma key
+     *
+     * Event properties to verify ','
+     * Chrome: keyIdentifier: "U+002C"
+     * FF: key
+     * IE: char|key
+     * Safari: -
+     *
+     * @param e
+     * @returns {boolean}
+     */
+    function validateComma(e) {
+        var originalEvent = e.originalEvent || e;
+        var char = e.key || e.char || originalEvent.keyIdentifier;
+        var unsupported = typeof char === 'undefined';
+        return (unsupported || e.keyCode === KEYS.comma) || char === ',' || char === 'U+002C';
+    }
+
     return {
         restrict: 'E',
         require: 'ngModel',
@@ -308,8 +327,8 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
                     change: function(text) {
                         events.trigger('input-change', text);
                     },
-                    keydown: function($event) {
-                        events.trigger('input-keydown', $event);
+                    keypress: function($event) {
+                        events.trigger('input-keypress', $event);
                     },
                     focus: function() {
                         if (scope.hasFocus) {
@@ -384,9 +403,9 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
                     element.triggerHandler('blur');
                     setElementValidity();
                 })
-                .on('input-keydown', function(event) {
+                .on('input-keypress', function(event) {
                     var key = event.keyCode,
-                        isModifier = event.shiftKey || event.altKey || event.ctrlKey || event.metaKey,
+                        isModifier = event.altKey || event.ctrlKey || event.metaKey,
                         addKeys = {},
                         shouldAdd, shouldRemove, shouldSelect, shouldEditLastTag;
 
@@ -398,7 +417,7 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
                     addKeys[KEYS.comma] = options.addOnComma;
                     addKeys[KEYS.space] = options.addOnSpace;
 
-                    shouldAdd = !options.addFromAutocompleteOnly && addKeys[key];
+                    shouldAdd = !options.addFromAutocompleteOnly && addKeys[key] && validateComma(event);
                     shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && tagList.selected;
                     shouldEditLastTag = key === KEYS.backspace && scope.newTag.text.length === 0 && options.enableEditingLastTag;
                     shouldSelect = (key === KEYS.backspace || key === KEYS.left || key === KEYS.right) && scope.newTag.text.length === 0 && !options.enableEditingLastTag;
@@ -728,7 +747,7 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","$transl
                         suggestionList.load(value, tagsInput.getTags());
         
                 })
-                .on('input-keydown', function(event) {
+                .on('input-keypress', function(event) {
                     var key = event.keyCode,
                         handled = false;
 
@@ -1129,7 +1148,7 @@ tagsInput.factory('tiUtil', ["$timeout", function($timeout) {
 /* HTML templates */
 tagsInput.run(["$templateCache", function($templateCache) {
     $templateCache.put('ngTagsInput/tags-input.html',
-    "<div class=\"host\" tabindex=\"-1\" ng-click=\"eventHandlers.host.click()\" ti-transclude-append=\"\"><div class=\"tags\" ng-class=\"{focused: hasFocus}\"><ul class=\"tag-list\"><li class=\"tag-item\" ng-repeat=\"tag in tagList.items track by track(tag)\" ng-class=\"{ selected: tag == tagList.selected }\"><ti-tag-item data=\"tag\"></ti-tag-item></li></ul><input class=\"input\" autocomplete=\"off\" ng-model=\"newTag.text\" ng-change=\"eventHandlers.input.change(newTag.text)\" ng-keydown=\"eventHandlers.input.keydown($event)\" ng-focus=\"eventHandlers.input.focus($event)\" ng-blur=\"eventHandlers.input.blur($event)\" ng-paste=\"eventHandlers.input.paste($event)\" ng-trim=\"false\" ng-class=\"{'invalid-tag': newTag.invalid}\" ng-disabled=\"disabled\" ti-bind-attrs=\"{type: options.type, placeholder: options.placeholder, tabindex: options.tabindex, spellcheck: options.spellcheck}\" ti-autosize=\"\"></div></div>"
+    "<div class=\"host\" tabindex=\"-1\" ng-click=\"eventHandlers.host.click()\" ti-transclude-append=\"\"><div class=\"tags\" ng-class=\"{focused: hasFocus}\"><ul class=\"tag-list\"><li class=\"tag-item\" ng-repeat=\"tag in tagList.items track by track(tag)\" ng-class=\"{ selected: tag == tagList.selected }\"><ti-tag-item data=\"tag\"></ti-tag-item></li></ul><input class=\"input\" autocomplete=\"off\" ng-model=\"newTag.text\" ng-change=\"eventHandlers.input.change(newTag.text)\" ng-keypress=\"eventHandlers.input.keypress($event)\" ng-focus=\"eventHandlers.input.focus($event)\" ng-blur=\"eventHandlers.input.blur($event)\" ng-paste=\"eventHandlers.input.paste($event)\" ng-trim=\"false\" ng-class=\"{'invalid-tag': newTag.invalid}\" ng-disabled=\"disabled\" ti-bind-attrs=\"{type: options.type, placeholder: options.placeholder, tabindex: options.tabindex, spellcheck: options.spellcheck}\" ti-autosize=\"\"></div></div>"
   );
 
   $templateCache.put('ngTagsInput/tag-item.html',
