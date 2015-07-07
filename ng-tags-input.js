@@ -417,7 +417,12 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
                     addKeys[KEYS.comma] = options.addOnComma;
                     addKeys[KEYS.space] = options.addOnSpace;
 
-                    shouldAdd = !options.addFromAutocompleteOnly && addKeys[key] && validateComma(event);
+                    if (event.keyCode === KEYS.comma){
+                        shouldAdd = !options.addFromAutocompleteOnly && addKeys[key] && validateComma(event);
+                    }
+                    else{
+                        shouldAdd = !options.addFromAutocompleteOnly && addKeys[key];
+                    }
                     shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && tagList.selected;
                     shouldEditLastTag = key === KEYS.backspace && scope.newTag.text.length === 0 && options.enableEditingLastTag;
                     shouldSelect = (key === KEYS.backspace || key === KEYS.left || key === KEYS.right) && scope.newTag.text.length === 0 && !options.enableEditingLastTag;
@@ -587,7 +592,6 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","$transl
                 if (promise !== lastPromise) {
                     return;
                 }
-                //debugger;
                 var nItems = [];
                 angular.forEach(items, function(el, ind) {
                   nItems.push({text: el, id: 1, index: ind});
@@ -601,7 +605,6 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","$transl
                 if (!isInList){
                     nItems.push({text: query + $translate.instant('NEW_TAG'), id:2, index: nItems.length});
                 }
-                //debugger; 
                 items = nItems;
                 items = tiUtil.makeObjectArray(items.data || items, getTagId());
                 items = getDifference(items, tags);
