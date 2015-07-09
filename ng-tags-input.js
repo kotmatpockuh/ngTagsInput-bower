@@ -296,6 +296,10 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
                 return !value || !value.length;
             };
 
+            angular.element('button.close').on('click', function(){
+                scope.newTag.setText('');
+            });
+
             scope.newTag = {
                 text: '',
                 invalid: null,
@@ -789,6 +793,10 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","$transl
                         return false;
                     }
                 });
+
+            $document.on('click', function(){
+                suggestionList.reset();
+            });
 
             events.on('suggestion-selected', function(index) {
                 scrollToElement(element, index);
