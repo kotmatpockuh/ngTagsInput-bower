@@ -296,7 +296,13 @@ tagsInput.directive('tagsInput', ["$timeout","$document","$window","tagsInputCon
                 return !value || !value.length;
             };
 
+            //console.log('cleanInput');
+
             angular.element('button.close').on('click', function(){
+                scope.newTag.setText('');
+            });
+
+            angular.element('.modal.custom a.modal-cancel').on('click', function(){
                 scope.newTag.setText('');
             });
 
