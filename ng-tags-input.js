@@ -800,7 +800,11 @@ tagsInput.directive('autoComplete', ["$document","$timeout","$sce","$q","$transl
                     }
                 });
 
-            $document.on('click', function(){
+            angular.element('button.close').on('click', function(){
+                suggestionList.reset();
+            });
+
+            angular.element('.modal.custom a.modal-cancel').on('click', function(){
                 suggestionList.reset();
             });
 
