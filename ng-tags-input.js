@@ -11,17 +11,17 @@
 'use strict';
 
 var KEYS = {
-    backspace: 8,
-    tab: 9,
-    enter: 13,
-    escape: 27,
-    space: 32,
-    up: 38,
-    down: 40,
-    left: 37,
-    right: 39,
-    delete: 46,
-    comma: 188
+  backspace: 8,   
+  tab: 9,    
+  enter: 13,   
+  escape: 27,    
+  space: 32,   
+  up: 38,    
+  down: 40,    
+  left: 37,    
+  right: 39,   
+  delete: 46,    
+  comma: 44
 };
 
 var MAX_SAFE_INTEGER = 9007199254740991;
@@ -325,6 +325,9 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
 
             scope.eventHandlers = {
                 input: {
+                    keypress: function($event) {
+                        events.trigger('input-keypress', $event);
+                    },
                     keydown: function($event) {
                         events.trigger('input-keydown', $event);
                     },
@@ -409,7 +412,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                     element.triggerHandler('blur');
                     setElementValidity();
                 })
-                .on('input-keydown', function(event) {
+                .on('input-keypress', function(event) {
                     var key = event.keyCode,
                         addKeys = {},
                         shouldAdd, shouldRemove, shouldSelect, shouldEditLastTag;
@@ -453,6 +456,48 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                     }
 
                     if (shouldAdd || shouldSelect || shouldRemove || shouldEditLastTag) {
+                        event.preventDefault();
+                    }
+                })
+                .on('input-keydown', function(event) {
+
+                    var key = event.keyCode,
+                        addKeys = {},
+                        shouldRemove, shouldSelect, shouldEditLastTag;
+
+                    if (tiUtil.isModifierOn(event) || hotkeys.indexOf(key) === -1) {
+                        return;
+                    }
+
+                    addKeys[KEYS.comma] = options.addOnComma;
+
+                    shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && tagList.selected;
+                    shouldEditLastTag = key === KEYS.backspace && scope.newTag.text().length === 0 && options.enableEditingLastTag;
+                    shouldSelect = (key === KEYS.backspace || key === KEYS.left || key === KEYS.right) && scope.newTag.text().length === 0 && !options.enableEditingLastTag;
+
+                    if (shouldEditLastTag) {
+                        var tag;
+
+                        tagList.selectPrior();
+                        tag = tagList.removeSelected();
+
+                        if (tag) {
+                            scope.newTag.text(tag[options.displayProperty]);
+                        }
+                    }
+                    else if (shouldRemove) {
+                        tagList.removeSelected();
+                    }
+                    else if (shouldSelect) {
+                        if (key === KEYS.left || key === KEYS.backspace) {
+                            tagList.selectPrior();
+                        }
+                        else if (key === KEYS.right) {
+                            tagList.selectNext();
+                        }
+                    }
+
+                    if (shouldSelect || shouldRemove || shouldEditLastTag) {
                         event.preventDefault();
                     }
                 })
@@ -667,8 +712,8 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "$tr
                 highlightMatchedText: [Boolean, true],
                 maxResultsToShow: [Number, 10],
                 loadOnDownArrow: [Boolean, false],
-                loadOnEmpty: [Boolean, false],
-                loadOnFocus: [Boolean, false],
+                loadOnEmpty: [Boolean, true],
+                loadOnFocus: [Boolean, true],
                 selectFirstMatch: [Boolean, true],
                 displayProperty: [String, '']
             });
@@ -744,7 +789,7 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "$tr
                         suggestionList.load(value, tagsInput.getTags());
                     }
                 })
-                .on('input-keydown', function(event) {
+                .on('input-keypress', function(event) {
                     var key = event.keyCode,
                         handled = false;
 
@@ -782,7 +827,28 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "$tr
                         event.stopImmediatePropagation();
                         return false;
                     }
+                })
+                .on('input-keydown', function(event) {
                 });
+
+            scope.$watch('suggestionList.visible', function(value) {    
+              if (value){    
+                var inputPosition = angular.element('.tags-editable .tags input.input').position();    
+                var hostPosition = angular.element('.tags-editable .host');    
+                if (hostPosition.width() >= (inputPosition.left + element.find('.autocomplete').width())){   
+                    element.find('.autocomplete').css({'left': inputPosition.left});   
+                }    
+                else{    
+                    element.find('.autocomplete').css({'left': (inputPosition.left + element.find('.autocomplete').width()) - hostPosition.width()});    
+                }    
+                if (hostPosition.height() / 2 >= inputPosition.top){   
+                    element.find('.autocomplete').css({'top': inputPosition.top + 30});    
+                }    
+                else{    
+                    element.find('.autocomplete').css({'top': -(hostPosition.height() - inputPosition.top - 30)});   
+                }    
+              }    
+             });
 
             events.on('suggestion-selected', function(index) {
                 scrollToElement(element, index);
@@ -1149,7 +1215,7 @@ tagsInput.factory('tiUtil', ["$timeout", function($timeout) {
 /* HTML templates */
 tagsInput.run(["$templateCache", function($templateCache) {
     $templateCache.put('ngTagsInput/tags-input.html',
-    "<div class=\"host\" tabindex=\"-1\" ng-click=\"eventHandlers.host.click()\" ti-transclude-append><div class=\"tags\" ng-class=\"{focused: hasFocus}\"><ul class=\"tag-list\"><li class=\"tag-item\" ng-repeat=\"tag in tagList.items track by track(tag)\" ng-class=\"{ selected: tag == tagList.selected }\" ng-click=\"eventHandlers.tag.click(tag)\"><ti-tag-item data=\"::tag\"></ti-tag-item></li></ul><input class=\"input\" autocomplete=\"off\" ng-model=\"newTag.text\" ng-model-options=\"{getterSetter: true}\" ng-keydown=\"eventHandlers.input.keydown($event)\" ng-focus=\"eventHandlers.input.focus($event)\" ng-blur=\"eventHandlers.input.blur($event)\" ng-paste=\"eventHandlers.input.paste($event)\" ng-trim=\"false\" ng-class=\"{'invalid-tag': newTag.invalid}\" ng-disabled=\"disabled\" ti-bind-attrs=\"{type: options.type, placeholder: options.placeholder, tabindex: options.tabindex, spellcheck: options.spellcheck}\" ti-autosize></div></div>"
+    "<div class=\"host\" tabindex=\"-1\" ng-click=\"eventHandlers.host.click()\" ti-transclude-append><div class=\"tags\" ng-class=\"{focused: hasFocus}\"><ul class=\"tag-list\"><li class=\"tag-item\" ng-repeat=\"tag in tagList.items track by track(tag)\" ng-class=\"{ selected: tag == tagList.selected }\" ng-click=\"eventHandlers.tag.click(tag)\"><ti-tag-item data=\"::tag\"></ti-tag-item></li></ul><input class=\"input\" autocomplete=\"off\" ng-model=\"newTag.text\" ng-model-options=\"{getterSetter: true}\" ng-keypress=\"eventHandlers.input.keypress($event)\" ng-keydown=\"eventHandlers.input.keydown($event)\" ng-focus=\"eventHandlers.input.focus($event)\" ng-blur=\"eventHandlers.input.blur($event)\" ng-paste=\"eventHandlers.input.paste($event)\" ng-trim=\"false\" ng-class=\"{'invalid-tag': newTag.invalid}\" ng-disabled=\"disabled\" ti-bind-attrs=\"{type: options.type, placeholder: options.placeholder, tabindex: options.tabindex, spellcheck: options.spellcheck}\" ti-autosize></div></div>"
   );
 
   $templateCache.put('ngTagsInput/tag-item.html',
