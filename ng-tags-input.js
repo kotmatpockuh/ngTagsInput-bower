@@ -10,7 +10,6 @@
 (function() {
 'use strict';
 
-
 var KEYS = {
   backspace: 8,   
   tab: 9,    
@@ -1216,7 +1215,7 @@ tagsInput.factory('tiUtil', ["$timeout", function($timeout) {
 /* HTML templates */
 tagsInput.run(["$templateCache", function($templateCache) {
     $templateCache.put('ngTagsInput/tags-input.html',
-    "<div class=\"host\" tabindex=\"-1\" ng-click=\"eventHandlers.host.click()\" ti-transclude-append><div class=\"tags\" ng-class=\"{focused: hasFocus}\"><ul class=\"tag-list\"><li class=\"tag-item\" ng-repeat=\"tag in tagList.items track by track(tag)\" ng-class=\"{ selected: tag == tagList.selected }\" ng-click=\"eventHandlers.tag.click(tag)\"><ti-tag-item data=\"::tag\"></ti-tag-item></li></ul><input class=\"input\" autocomplete=\"off\" ng-model=\"newTag.text\" ng-model-options=\"{getterSetter: true}\" ng-keypress=\"eventHandlers.input.keypress($event)\" ng-keydown=\"eventHandlers.input.keydown($event)\" ng-focus=\"eventHandlers.input.focus($event)\" ng-blur=\"eventHandlers.input.blur($event)\" ng-paste=\"eventHandlers.input.paste($event)\" ng-trim=\"false\" ng-class=\"{'invalid-tag': newTag.invalid}\" ng-disabled=\"disabled\" ti-bind-attrs=\"{type: options.type, placeholder: options.placeholder, tabindex: options.tabindex, spellcheck: options.spellcheck}\" ti-autosize></div></div>"
+    "<div class=\"host\" tabindex=\"-1\" ng-click=\"eventHandlers.host.click()\" ti-transclude-append><div class=\"tags\" malihu-scrollbar ng-class=\"{focused: hasFocus}\"><ul class=\"tag-list\"><li class=\"tag-item\" ng-repeat=\"tag in tagList.items track by track(tag)\" ng-class=\"{ selected: tag == tagList.selected }\" ng-click=\"eventHandlers.tag.click(tag)\"><ti-tag-item data=\"::tag\"></ti-tag-item></li></ul><input class=\"input\" autocomplete=\"off\" ng-model=\"newTag.text\" ng-model-options=\"{getterSetter: true}\" ng-keypress=\"eventHandlers.input.keypress($event)\" ng-keydown=\"eventHandlers.input.keydown($event)\" ng-focus=\"eventHandlers.input.focus($event)\" ng-blur=\"eventHandlers.input.blur($event)\" ng-paste=\"eventHandlers.input.paste($event)\" ng-trim=\"false\" ng-class=\"{'invalid-tag': newTag.invalid}\" ng-disabled=\"disabled\" ti-bind-attrs=\"{type: options.type, placeholder: options.placeholder, tabindex: options.tabindex, spellcheck: options.spellcheck}\" ti-autosize></div></div>"
   );
 
   $templateCache.put('ngTagsInput/tag-item.html',
@@ -1225,7 +1224,7 @@ tagsInput.run(["$templateCache", function($templateCache) {
 
   $templateCache.put('ngTagsInput/auto-complete.html',
     "<div class=\"autocomplete\" ng-if=\"suggestionList.visible\">\
-        <ul class=\"suggestion-list existing\"><div class=\"tag-scroller\" malihu-scrollbar><li class=\"suggestion-item\" ng-repeat=\"item in filterResultSugg = (suggestionList.items | filter: {id: 1}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex($index)\" ng-mouseenter=\"suggestionList.select($index)\"><ti-autocomplete-match data=\"::item\"></ti-autocomplete-match></li></ul>\
+        <ul class=\"suggestion-list existing\"><div class=\"tag-scroller\" nz-scrollbar><li class=\"suggestion-item\" ng-repeat=\"item in filterResultSugg = (suggestionList.items | filter: {id: 1}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex($index)\" ng-mouseenter=\"suggestionList.select($index)\"><ti-autocomplete-match data=\"::item\"></ti-autocomplete-match></li></ul>\
         <div ng-show=\"filterResultSugg && filterResultSugg.length\" class=\"line\"></div> <ul ng-show=\"filterResult && filterResult.length > 0\" class=\"suggestion-list new-tag\"><i class=\"fa fa-plus-circle\"></i><li class=\"suggestion-item\" ng-repeat=\"item in filterResult = (suggestionList.items | filter: {id: 2}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex(item.index)\" ng-mouseenter=\"suggestionList.select(item.index)\"><ti-autocomplete-match data=\"::item\"></ti-autocomplete-match></li></div></ul>\
     </div>"
   );
@@ -1236,4 +1235,3 @@ tagsInput.run(["$templateCache", function($templateCache) {
 }]);
 
 }());
-
