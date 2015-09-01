@@ -831,25 +831,6 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "$tr
                 .on('input-keydown', function(event) {
                 });
 
-            scope.$watch('suggestionList.visible', function(value) {    
-              if (value){    
-                var inputPosition = angular.element('.tags-editable .tags input.input').position();    
-                var hostPosition = angular.element('.tags-editable .host');    
-                if (hostPosition.width() >= (inputPosition.left + element.find('.autocomplete').width())){   
-                    element.find('.autocomplete').css({'left': inputPosition.left});   
-                }    
-                else{    
-                    element.find('.autocomplete').css({'left': (inputPosition.left + element.find('.autocomplete').width()) - hostPosition.width()});    
-                }    
-                if (hostPosition.height() / 2 >= inputPosition.top){   
-                    element.find('.autocomplete').css({'top': inputPosition.top + 30});    
-                }    
-                else{    
-                    element.find('.autocomplete').css({'top': -(hostPosition.height() - inputPosition.top - 30)});   
-                }    
-              }    
-             });
-
             events.on('suggestion-selected', function(index) {
                 scrollToElement(element, index);
             });
