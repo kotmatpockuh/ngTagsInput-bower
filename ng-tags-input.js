@@ -545,7 +545,9 @@ tagsInput.directive('tiTagItem', ["tiUtil", function(tiUtil) {
             };
             scope.$removeTag = function() {
                 tagsInput.removeTag(scope.$index);
+                scope.$parent.$parent.$parent.removingTag = true;
             };
+            
 
             scope.$watch('$parent.$index', function(value) {
                 scope.$index = value;
@@ -785,9 +787,11 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "$tr
                 })
                 .on('input-focus', function() {
                     var value = tagsInput.getCurrentTagText();
-                    if (options.loadOnFocus && shouldLoadSuggestions(value)) {
+      
+                    if (options.loadOnFocus && shouldLoadSuggestions(value) && !scope.$parent.$parent.$parent.removingTag) {
                         suggestionList.load(value, tagsInput.getTags());
                     }
+                    scope.$parent.$parent.$parent.removingTag = false;
                 })
                 .on('input-keypress', function(event) {
                     var key = event.keyCode,
