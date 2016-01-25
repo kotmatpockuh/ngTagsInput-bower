@@ -85,7 +85,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
         };
 
         setTagText = function(tag, text) {
-            tag[options.displayProperty] = text;
+            tag[options.displayProperty] = text.toLowerCase();
         };
 
         tagIsValid = function(tag) {
