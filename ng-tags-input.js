@@ -85,7 +85,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
         };
 
         setTagText = function(tag, text) {
-            tag[options.displayProperty] = text.toLowerCase();
+            tag[options.displayProperty] = text.toLowerCase().replace(/[.,\/#!$%\^&\*;{}=_`~<>]/g, '');
         };
 
         tagIsValid = function(tag) {
