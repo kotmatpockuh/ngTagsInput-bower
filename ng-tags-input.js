@@ -85,7 +85,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
         };
 
         setTagText = function(tag, text) {
-            tag[options.displayProperty] = text.toLowerCase().replace(/[.,\/#!$%\^&\*;{}=_`~<>]/g, '');
+            tag[options.displayProperty] = text.toLowerCase();
         };
 
         tagIsValid = function(tag) {
@@ -1210,7 +1210,7 @@ tagsInput.run(["$templateCache", function($templateCache) {
   $templateCache.put('ngTagsInput/auto-complete.html',
     "<div class=\"autocomplete\" ng-if=\"suggestionList.visible\">\
         <ul class=\"suggestion-list existing\"><div class=\"tag-scroller\" malihu-scrollbar><li class=\"suggestion-item\" ng-repeat=\"item in filterResultSugg = (suggestionList.items | filter: {id: 1}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex($index)\" ng-mouseenter=\"suggestionList.select($index)\"><ti-autocomplete-match data=\"::item\"></ti-autocomplete-match></li></ul>\
-        <div ng-show=\"filterResultSugg && filterResultSugg.length\" class=\"line\"></div> <ul ng-show=\"filterResult && filterResult.length > 0\" class=\"suggestion-list new-tag\"><i class=\"fa fa-plus-circle\"></i><li class=\"suggestion-item\" ng-repeat=\"item in filterResult = (suggestionList.items | filter: {id: 2}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex(item.index)\" ng-mouseenter=\"suggestionList.select(item.index)\"><ti-autocomplete-match data=\"::item\"></ti-autocomplete-match></li></div></ul>\
+        <div ng-show=\"filterResultSugg && filterResultSugg.length\" class=\"line\"></div> <ul ng-show=\"filterResult && filterResult.length > 0\" class=\"suggestion-list new-tag\" ng-class=\"{'underlined': filterResultSugg.length > 0}\"><i class=\"fa fa-plus-circle\"></i><li class=\"suggestion-item\" ng-repeat=\"item in filterResult = (suggestionList.items | filter: {id: 2}) track by track(item)\" ng-class=\"{selected: item == suggestionList.selected}\" ng-click=\"addSuggestionByIndex(item.index)\" ng-mouseenter=\"suggestionList.select(item.index)\"><ti-autocomplete-match data=\"::item\"></ti-autocomplete-match></li></div></ul>\
     </div>"
   );
 
